@@ -14,4 +14,5 @@ sleep 5
 yarp connect /icubSim/cam/left /image/in
 yarp connect /targetFound /eyePort
 
+
 read
