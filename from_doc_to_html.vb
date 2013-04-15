@@ -1,3 +1,7 @@
+' This file is Git managed.
+'
+' Full comments on why this file and what it does: see at <a href="../../../../computing/lib/WordToHtml_VBA_script.doc#final_script"/> : please tell this href node if the file is moved or deleted.
+
 Sub ChangeDocsToTxtOrRTFOrHTML()
 'with export to PDF in Word 2007
     Dim fs As Object
