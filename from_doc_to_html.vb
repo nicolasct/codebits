@@ -2,9 +2,6 @@
 '
 ' Full comments on why this file and what it does: see at <a href="../../../../computing/lib/WordToHtml_VBA_script.doc#final_script"/> : please tell this href node if the file is moved or deleted.
 
-
-Declare PtrSafe Function MakeSureDirectoryPathExists Lib "imagehlp.dll" (ByVal lpPath As String) As Long 'à mettre en début de file, c'est un library call pour la création de multiples directories, genre "dir1/dir2/dir3/..."
-
 Sub ChangeDocsToTxtOrRTFOrHTML()
 'with export to PDF in Word 2007
     Dim fs As Object
@@ -32,7 +29,7 @@ Sub ChangeDocsToTxtOrRTFOrHTML()
     End Select
     Application.ScreenUpdating = False
     Set fs = CreateObject("Scripting.FileSystemObject")
-    
+   
     
     Dim files As New Collection
     GetFilesRecursive fs.GetFolder(locFolder), "doc", files, fs
@@ -59,8 +56,8 @@ Sub ChangeDocsToTxtOrRTFOrHTML()
                 oBuildFolder_complete_String = buildFolder & "\" & strDocRelativePath
                 MakeFullDir (oBuildFolder_complete_String)
                 Set oBuildFolder_complete = fs.GetFolder(oBuildFolder_complete_String)
-                ChangeFileOpenDirectory oBuildFolder_complete
-                'MsgBox "oBuildFolder_complete is " & oBuildFolder_complete
+                'ChangeFileOpenDirectory oBuildFolder_complete // not used any more: we save locally now!
+                ChangeFileOpenDirectory oFile.parentFolder
             
                       
                     
@@ -91,7 +88,7 @@ Sub ChangeDocsToTxtOrRTFOrHTML()
                                     ActiveDocument.Hyperlinks(i).Address = link_to_html
                                 Next
                                 
-                                ' Change also any display names, if they contain a ".doc" extension:
+                                ' Change also any link display names, if they contain a ".doc" extension (for coherency and user-friendlyness)
                                 With ActiveDocument.Content.Find
                                     .Text = ".doc"
                                     .Replacement.ClearFormatting
@@ -102,7 +99,10 @@ Sub ChangeDocsToTxtOrRTFOrHTML()
                                 
                                 ActiveDocument.Save
                                 
-                
+                                d.Close
+                                Const OverwriteExisting = True
+                                MsgBox "Saving ... " & oFile.parentFolder.Path & "\" & strDocName
+                                fs.CopyFile oFile.parentFolder.Path & "\" & strDocName, oBuildFolder_complete_String & "\", OverwriteExisting
                 
                 
                         Case Is = "PDF"
@@ -111,85 +111,16 @@ Sub ChangeDocsToTxtOrRTFOrHTML()
                             'ActiveDocument.ExportAsFixedFormat OutputFileName:=strDocName, ExportFormat:=wdExportFormatPDF
                             
                         End Select
+                        
+
                 
             End If '(If .Found = False Then)
         End With '(With ActiveDocument.Content.Find : only process if the file doesn't contain the string "DONTPUBLISH":
        
-    d.Close
+    
     'ChangeFileOpenDirectory oFolder
     Next oFile
     
     Application.ScreenUpdating = True
     
 End Sub
-
-
-
- 
-Public Sub MakeFullDir(strPath As String)
-    If Right(strPath, 1) <> "\" Then strPath = strPath & "\" 'Optional depending upon intent
-    MakeSureDirectoryPathExists strPath
-End Sub
-
-Sub testMakeFullDir()
- MakeFullDir ("C:\Users\pippo\cne\d1\d2")
-End Sub
-
-
-
-' test for Function getMedianPath
-
-Sub testGetMedianPath()
-    Dim fs As Object
-    Set fs = CreateObject("Scripting.FileSystemObject")
-    MsgBox "Returning " & getMedianPath("C:\Users\pippo\Documents\Encyclopedia\Know_Yourself\ai\plymouth\iCubSim", "C:\Users\pippo\Documents\Encyclopedia", fs)
-End Sub
-
-' get the relative path starting from a root path.
-' For ex., with currentPath = "C:\Users\pippo\Documents\Encyclopedia\Know_Yourself\ai\plymouth\iCubSim"
-' and given rootPath of "C:\Users\pippo\Documents\Encyclopedia", it will return "Know_Yourself\ai\plymouth\iCubSim"
-' Use testGetMedianPath() for testing.
-
-Function getMedianPath(currentPath As String, rootPath As String, fs As Scripting.FileSystemObject) As String
-
-    Dim parentFolderS As String
-    
-    Dim medianPath As String
-     
-    Dim inputFolder As Object
-    Set inputFolder = fs.GetFolder(currentPath)
-    
-    'MsgBox "inputFolder is" & inputFolder
-    
-    Set parent_Folder = inputFolder
-    Do While parent_Folder <> rootPath
-        Set parent_Folder = parent_Folder.parentFolder
-        medianPath = Right(currentPath, Len(currentPath) - Len(parent_Folder) - 1)
-    Loop
-    'MsgBox "End of loop, parentFolder is " & parent_Folder
-    'MsgBox "And medianPath is " & medianPath
-    
-    getMedianPath = medianPath
-    
-    
-End Function
-
-
-
-Sub GetFilesRecursive(f As Scripting.Folder, filter As String, c As Collection, fso As Scripting.FileSystemObject)
-  Dim sf As Scripting.Folder
-  Dim file As Scripting.file
-
-  For Each file In f.files
-    If InStr(1, fso.GetExtensionName(file.Name), filter, vbTextCompare) = 1 Then
-      c.Add file, file.Path
-    End If
-  Next file
-
-  For Each sf In f.SubFolders
-    GetFilesRecursive sf, filter, c, fso
-  Next sf
-End Sub
-
-
-
