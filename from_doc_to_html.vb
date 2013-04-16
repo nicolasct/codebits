@@ -1,6 +1,6 @@
 ' This file is Git managed.
 '
-' Full comments on why this file and what it does: see at <a href="../../../../computing/lib/WordToHtml_VBA_script.doc#final_script"/> : please tell this href node if the file is moved or deleted.
+' Full comments on why this file and what it does: see at <a href="../../../../computing/lib/WordToHtml_VBA_script.doc#final_script"/> (path relative to my local file system) : please tell this href node if the file is moved or deleted.
 
 Sub ChangeDocsToTxtOrRTFOrHTML()
 'with export to PDF in Word 2007
@@ -33,7 +33,7 @@ Sub ChangeDocsToTxtOrRTFOrHTML()
    
     
     Dim files As New Collection
-    GetFilesRecursive fs.GetFolder(locFolder), "doc", files, fs
+    GetFilesRecursive fs.GetFolder(locFolder), "doc", files, fs, False
     
     Dim oFile As Scripting.file
     For Each oFile In files
