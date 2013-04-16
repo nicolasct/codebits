@@ -7,6 +7,7 @@ Sub ChangeDocsToTxtOrRTFOrHTML()
     Dim fs As Object
 
     Dim strDocName As String
+    Dim strDocNameWithoutExtension As String 'keep the name without extension to use it for referencing the directory with with image files
     Dim strDocRelativePath As String 'for ex: "Know_Yourself\ai\plymouth\iCubSim", while strDocName would be "iCubSim_notes" (le ".doc" sera enlevé et remplacé par l'extension voulu)
     Dim intPos As Integer
     Dim locFolder As String
@@ -49,7 +50,7 @@ Sub ChangeDocsToTxtOrRTFOrHTML()
             
                 strDocName = ActiveDocument.Name
                 intPos = InStrRev(strDocName, ".")
-                strDocName = Left(strDocName, intPos - 1)
+                strDocNameWithoutExtension = Left(strDocName, intPos - 1)
                 strDocRelativePath = getMedianPath(oFile.parentFolder, "C:\Users\pippo\Documents\Encyclopedia", fs)
                 'MsgBox "strDocRelativePath is " & strDocRelativePath
                 Dim oBuildFolder_complete_String As String
@@ -63,14 +64,14 @@ Sub ChangeDocsToTxtOrRTFOrHTML()
                     
                         Select Case fileType
                         Case Is = "TXT"
-                            strDocName = strDocName & ".txt"
+                            strDocName = strDocNameWithoutExtension & ".txt"
                             ActiveDocument.SaveAs FileName:=strDocName, FileFormat:=wdFormatText
                         Case Is = "RTF"
-                            strDocName = strDocName & ".rtf"
+                            strDocName = strDocNameWithoutExtension & ".rtf"
                             ActiveDocument.SaveAs FileName:=strDocName, FileFormat:=wdFormatRTF
                             
                         Case Is = "HTML"
-                            strDocName = strDocName & ".html"
+                            strDocName = strDocNameWithoutExtension & ".html"
                             ActiveDocument.SaveAs FileName:=strDocName, FileFormat:=wdFormatFilteredHTML
                             
                                 'Loop through all hyperlinks and change .doc extension for .html
@@ -100,13 +101,16 @@ Sub ChangeDocsToTxtOrRTFOrHTML()
                                 ActiveDocument.Save
                                 
                                 d.Close
-                                Const OverwriteExisting = True
-                                MsgBox "Saving ... " & oFile.parentFolder.Path & "\" & strDocName
-                                fs.CopyFile oFile.parentFolder.Path & "\" & strDocName, oBuildFolder_complete_String & "\", OverwriteExisting
+                                ' MsgBox "Saving ... " & oFile.parentFolder.Path & "\" & strDocName
+                                fs.MoveFile oFile.parentFolder.Path & "\" & strDocName, oBuildFolder_complete_String & "\"
+                               ' fs.MkDir oBuildFolder_complete_String & "\" & strDocNameWithoutExtension & "_files"
+                                MakeFullDir (oBuildFolder_complete_String & "\" & strDocNameWithoutExtension & "_files")
+                                fs.MoveFile oFile.parentFolder.Path & "\" & strDocNameWithoutExtension & "_files\*", oBuildFolder_complete_String & "\" & strDocNameWithoutExtension & "_files\"
+                                fs.DeleteFolder oFile.parentFolder.Path & "\" & strDocNameWithoutExtension & "_files", True 'better to clean away this empty folder"
                 
                 
                         Case Is = "PDF"
-                            strDocName = strDocName & ".pdf"
+                            strDocName = strDocNameWithoutExtension & ".pdf"
                             ' *** Word 2007 users - remove the apostrophe at the start of the next line ***
                             'ActiveDocument.ExportAsFixedFormat OutputFileName:=strDocName, ExportFormat:=wdExportFormatPDF
                             
