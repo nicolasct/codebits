@@ -2,6 +2,31 @@
 '
 ' Full comments on why this file and what it does: see at <a href="../../../../computing/lib/WordToHtml_VBA_script.doc#final_script"/> (path relative to my local file system) : please tell this href node if the file is moved or deleted.
 
+Declare PtrSafe Function MakeSureDirectoryPathExists Lib "imagehlp.dll" (ByVal lpPath As String) As Long 'à mettre en début de file, c'est un library call pour la création de multiples directories, genre "dir1/dir2/dir3/..."
+ 
+
+Sub InsertTable1_1()
+'
+' InsertTable1_1 Macro
+'
+'
+    ActiveDocument.Tables.Add Range:=Selection.Range, NumRows:=1, NumColumns:= _
+        1, DefaultTableBehavior:=wdWord9TableBehavior, AutoFitBehavior:= _
+        wdAutoFitFixed
+    With Selection.Tables(1)
+        If .Style <> "Table Grid" Then
+            .Style = "Table Grid"
+        End If
+        .ApplyStyleHeadingRows = True
+        .ApplyStyleLastRow = False
+        .ApplyStyleFirstColumn = True
+        .ApplyStyleLastColumn = False
+        .ApplyStyleRowBands = True
+        .ApplyStyleColumnBands = False
+    End With
+End Sub
+
+
 Sub ChangeDocsToTxtOrRTFOrHTML()
 'with export to PDF in Word 2007
     Dim fs As Object
@@ -70,9 +95,12 @@ Sub ChangeDocsToTxtOrRTFOrHTML()
                             strDocName = strDocNameWithoutExtension & ".rtf"
                             ActiveDocument.SaveAs FileName:=strDocName, FileFormat:=wdFormatRTF
                             
+                      
                         Case Is = "HTML"
                             strDocName = strDocNameWithoutExtension & ".html"
-                            ActiveDocument.SaveAs FileName:=strDocName, FileFormat:=wdFormatFilteredHTML
+                            'ActiveDocument.WebOptions.AlwaysSaveInDefaultEncoding = False (AlwaysSaveInDefaultEncoding ne s’applique pas à l’ActiveDocument level, seulement Application level)
+                            ActiveDocument.WebOptions.Encoding = msoEncodingUTF8
+                            ActiveDocument.SaveAs FileName:=strDocName, FileFormat:=wdFormatFilteredHTML, Encoding:=msoEncodingUTF8
                             
                                 'Loop through all hyperlinks and change .doc extension for .html
                                     Dim link_to_doc As String
@@ -127,4 +155,88 @@ Sub ChangeDocsToTxtOrRTFOrHTML()
     
     Application.ScreenUpdating = True
     
+End Sub
+
+
+ 
+Public Sub MakeFullDir(strPath As String)
+    If Right(strPath, 1) <> "\" Then strPath = strPath & "\" 'Optional depending upon intent
+    MakeSureDirectoryPathExists strPath
+End Sub
+
+Sub testMakeFullDir()
+ MakeFullDir ("C:\Users\pippo\cne\d1\d2")
+End Sub
+
+
+
+' test for Function getMedianPath
+
+Sub testGetMedianPath()
+    Dim fs As Object
+    Set fs = CreateObject("Scripting.FileSystemObject")
+    MsgBox "Returning " & getMedianPath("C:\Users\pippo\Documents\Encyclopedia\Know_Yourself\ai\plymouth\iCubSim", "C:\Users\pippo\Documents\Encyclopedia", fs)
+End Sub
+
+' get the relative path starting from a root path.
+' For ex., with currentPath = "C:\Users\pippo\Documents\Encyclopedia\Know_Yourself\ai\plymouth\iCubSim"
+' and given rootPath of "C:\Users\pippo\Documents\Encyclopedia", it will return "Know_Yourself\ai\plymouth\iCubSim"
+' Use testGetMedianPath() for testing.
+
+Function getMedianPath(currentPath As String, rootPath As String, fs As Scripting.FileSystemObject) As String
+
+    Dim parentFolderS As String
+    
+    Dim medianPath As String
+     
+    Dim inputFolder As Object
+    Set inputFolder = fs.GetFolder(currentPath)
+    
+    'MsgBox "inputFolder is" & inputFolder
+    
+    Set parent_Folder = inputFolder
+    Do While parent_Folder <> rootPath
+        Set parent_Folder = parent_Folder.parentFolder
+        medianPath = Right(currentPath, Len(currentPath) - Len(parent_Folder) - 1)
+    Loop
+    'MsgBox "End of loop, parentFolder is " & parent_Folder
+    'MsgBox "And medianPath is " & medianPath
+    
+    getMedianPath = medianPath
+    
+    
+End Function
+
+
+
+Sub GetFilesRecursive(f As Scripting.Folder, filter As String, c As Collection, fso As Scripting.FileSystemObject, recursive As Boolean)
+  Dim sf As Scripting.Folder
+  Dim file As Scripting.file
+
+    For Each file In f.files
+      If InStr(1, fso.GetExtensionName(file.Name), filter, vbTextCompare) = 1 Then
+        c.Add file, file.Path
+      End If
+    Next file
+
+    If recursive = True Then
+      For Each sf In f.SubFolders
+        GetFilesRecursive sf, filter, c, fso, recursive
+      Next sf
+    End If
+End Sub
+
+
+Sub Macro1()
+'
+' Macro1 Macro
+'
+'
+End Sub
+Sub clearFormating()
+'
+' clearFormating Macro
+'
+'
+    Selection.ClearFormatting
 End Sub
