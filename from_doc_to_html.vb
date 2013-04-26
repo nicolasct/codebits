@@ -2,7 +2,7 @@
 '
 ' Full comments on why this file and what it does: see at <a href="../../../../computing/lib/WordToHtml_VBA_script.doc#final_script"/> (path relative to my local file system) : please tell this href node if the file is moved or deleted.
 
-Declare PtrSafe Function MakeSureDirectoryPathExists Lib "imagehlp.dll" (ByVal lpPath As String) As Long 'à mettre en début de file, c'est un library call pour la création de multiples directories, genre "dir1/dir2/dir3/..."
+Private Declare PtrSafe Function MakeSureDirectoryPathExists Lib "imagehlp.dll" (ByVal lpPath As String) As Long 'à mettre en début de file, c'est un library call pour la création de multiples directories, genre "dir1/dir2/dir3/..."
  
 
 Sub InsertTable1_1()
