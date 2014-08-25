@@ -41,7 +41,7 @@ Sub ChangeDocsToTxtOrRTFOrHTML()
     
     On Error Resume Next
     
-    buildFolder = "C:\Users\pippo\cne"
+    buildFolder = "C:\Users\pippo\Documents\cne_toOrange"
     locFolder = InputBox("Enter the folder path to DOCs", "File Conversion", "C:\Users\pippo\Documents\Encyclopedia\Know_Yourself\ai\plymouth")
     Select Case Application.Version
         Case Is < 12
@@ -62,92 +62,99 @@ Sub ChangeDocsToTxtOrRTFOrHTML()
     
     Dim oFile As Scripting.file
     For Each oFile In files
+    If oFile.Name = "question_answering_osna_sum.doc" Then 'True Then
+    
+    
         Dim d As Document
         Set d = Application.Documents.Open(oFile.Path)
         
-        ' only process if the file doesn't contain the string "DONTPUBLISH":
-        With ActiveDocument.Content.Find
-            .Text = "DONTPUBLISH"
-            .Forward = True
-            .Execute
-            If .Found = False Then
-            
-            
-                strDocName = ActiveDocument.Name
-                intPos = InStrRev(strDocName, ".")
-                strDocNameWithoutExtension = Left(strDocName, intPos - 1)
-                strDocRelativePath = getMedianPath(oFile.parentFolder, "C:\Users\pippo\Documents\Encyclopedia", fs)
-                'MsgBox "strDocRelativePath is " & strDocRelativePath
-                Dim oBuildFolder_complete_String As String
-                oBuildFolder_complete_String = buildFolder & "\" & strDocRelativePath
-                MakeFullDir (oBuildFolder_complete_String)
-                Set oBuildFolder_complete = fs.GetFolder(oBuildFolder_complete_String)
-                'ChangeFileOpenDirectory oBuildFolder_complete // not used any more: we save locally now!
-                ChangeFileOpenDirectory oFile.parentFolder
-            
-                      
-                    
-                        Select Case fileType
-                        Case Is = "TXT"
-                            strDocName = strDocNameWithoutExtension & ".txt"
-                            ActiveDocument.SaveAs FileName:=strDocName, FileFormat:=wdFormatText
-                        Case Is = "RTF"
-                            strDocName = strDocNameWithoutExtension & ".rtf"
-                            ActiveDocument.SaveAs FileName:=strDocName, FileFormat:=wdFormatRTF
-                            
-                      
-                        Case Is = "HTML"
-                            strDocName = strDocNameWithoutExtension & ".html"
-                            'ActiveDocument.WebOptions.AlwaysSaveInDefaultEncoding = False (AlwaysSaveInDefaultEncoding ne s’applique pas à l’ActiveDocument level, seulement Application level)
-                            ActiveDocument.WebOptions.Encoding = msoEncodingUTF8
-                            ActiveDocument.SaveAs FileName:=strDocName, FileFormat:=wdFormatFilteredHTML, Encoding:=msoEncodingUTF8
-                            
-                                'Loop through all hyperlinks and change .doc extension for .html
-                                    Dim link_to_doc As String
-                                    Dim link_to_html As String
-                                    Set RegEx = CreateObject("vbscript.regexp")
-                                For i = 1 To ActiveDocument.Hyperlinks.Count
-                                    link_to_doc = ActiveDocument.Hyperlinks(i).Address
-                                        With RegEx
-                                            .IgnoreCase = True
-                                            .Global = True
-                                            .Pattern = "(.*).doc"
-                                        End With
-                                        link_to_html = RegEx.Replace(link_to_doc, "$1.html")
-                                    ActiveDocument.Hyperlinks(i).Address = link_to_html
-                                Next
-                                
-                                ' Change also any link display names, if they contain a ".doc" extension (for coherency and user-friendlyness)
-                                With ActiveDocument.Content.Find
-                                    .Text = ".doc"
-                                    .Replacement.ClearFormatting
-                                    .Replacement.Text = ".html"
-                                    .Execute Replace:=wdReplaceAll, Forward:=True, _
-                                    Wrap:=wdFindContinue
-                                End With
-                                
-                                ActiveDocument.Save
-                                
-                                d.Close
-                                ' MsgBox "Saving ... " & oFile.parentFolder.Path & "\" & strDocName
-                                fs.MoveFile oFile.parentFolder.Path & "\" & strDocName, oBuildFolder_complete_String & "\"
-                               ' fs.MkDir oBuildFolder_complete_String & "\" & strDocNameWithoutExtension & "_files"
-                                MakeFullDir (oBuildFolder_complete_String & "\" & strDocNameWithoutExtension & "_files")
-                                fs.MoveFile oFile.parentFolder.Path & "\" & strDocNameWithoutExtension & "_files\*", oBuildFolder_complete_String & "\" & strDocNameWithoutExtension & "_files\"
-                                fs.DeleteFolder oFile.parentFolder.Path & "\" & strDocNameWithoutExtension & "_files", True 'better to clean away this empty folder"
+             
+        
+            ' only process if the file doesn't contain the string "DONTPUBLISH":
+            With ActiveDocument.Content.Find
+                .Text = "DONTPUBLISH"
+                .Forward = True
+                .Execute
+                If .Found = False Then
                 
                 
-                        Case Is = "PDF"
-                            strDocName = strDocNameWithoutExtension & ".pdf"
-                            ' *** Word 2007 users - remove the apostrophe at the start of the next line ***
-                            'ActiveDocument.ExportAsFixedFormat OutputFileName:=strDocName, ExportFormat:=wdExportFormatPDF
-                            
-                        End Select
+                    strDocName = ActiveDocument.Name
+                    intPos = InStrRev(strDocName, ".")
+                    strDocNameWithoutExtension = Left(strDocName, intPos - 1)
+                    strDocRelativePath = getMedianPath(oFile.parentFolder, "C:\Users\pippo\Documents\Encyclopedia", fs)
+                    'MsgBox "strDocRelativePath is " & strDocRelativePath
+                    Dim oBuildFolder_complete_String As String
+                    oBuildFolder_complete_String = buildFolder & "\" & strDocRelativePath
+                    MakeFullDir (oBuildFolder_complete_String)
+                    Set oBuildFolder_complete = fs.GetFolder(oBuildFolder_complete_String)
+                    'ChangeFileOpenDirectory oBuildFolder_complete // not used any more: we save locally now!
+                    ChangeFileOpenDirectory oFile.parentFolder
+                
+                          
                         
-
-                
-            End If '(If .Found = False Then)
-        End With '(With ActiveDocument.Content.Find : only process if the file doesn't contain the string "DONTPUBLISH":
+                            Select Case fileType
+                            Case Is = "TXT"
+                                strDocName = strDocNameWithoutExtension & ".txt"
+                                ActiveDocument.SaveAs FileName:=strDocName, FileFormat:=wdFormatText
+                            Case Is = "RTF"
+                                strDocName = strDocNameWithoutExtension & ".rtf"
+                                ActiveDocument.SaveAs FileName:=strDocName, FileFormat:=wdFormatRTF
+                                
+                          
+                            Case Is = "HTML"
+                                strDocName = strDocNameWithoutExtension & ".html"
+                                'ActiveDocument.WebOptions.AlwaysSaveInDefaultEncoding = False (AlwaysSaveInDefaultEncoding ne s’applique pas à l’ActiveDocument level, seulement Application level)
+                                ActiveDocument.WebOptions.Encoding = msoEncodingUTF8
+                                ActiveDocument.SaveAs FileName:=strDocName, FileFormat:=wdFormatFilteredHTML, Encoding:=msoEncodingUTF8
+                                
+                                    'Loop through all hyperlinks and change .doc extension for .html
+                                        Dim link_to_doc As String
+                                        Dim link_to_html As String
+                                        Set RegEx = CreateObject("vbscript.regexp")
+                                    For i = 1 To ActiveDocument.Hyperlinks.Count
+                                        link_to_doc = ActiveDocument.Hyperlinks(i).Address
+                                            With RegEx
+                                                .IgnoreCase = True
+                                                .Global = True
+                                                .Pattern = "(.*)\.doc"
+                                            End With
+                                            link_to_html = RegEx.Replace(link_to_doc, "$1.html")
+                                        ActiveDocument.Hyperlinks(i).Address = link_to_html
+                                    Next
+                                    
+                                    ' Change also any link display names, if they contain a ".doc" extension (for coherency and user-friendlyness)
+                                    With ActiveDocument.Content.Find
+                                        .Text = ".doc"
+                                        .Replacement.ClearFormatting
+                                        .Replacement.Text = ".html"
+                                        .Execute Replace:=wdReplaceAll, Forward:=True, _
+                                        Wrap:=wdFindContinue
+                                    End With
+                                    
+                                    ActiveDocument.Save
+                                    
+                                    d.Close
+                                    ' MsgBox "Saving ... " & oFile.parentFolder.Path & "\" & strDocName
+                                    fs.MoveFile oFile.parentFolder.Path & "\" & strDocName, oBuildFolder_complete_String & "\"
+                                   ' fs.MkDir oBuildFolder_complete_String & "\" & strDocNameWithoutExtension & "_files"
+                                    MakeFullDir (oBuildFolder_complete_String & "\" & strDocNameWithoutExtension & "_files")
+                                    fs.MoveFile oFile.parentFolder.Path & "\" & strDocNameWithoutExtension & "_files\*", oBuildFolder_complete_String & "\" & strDocNameWithoutExtension & "_files\"
+                                    fs.DeleteFolder oFile.parentFolder.Path & "\" & strDocNameWithoutExtension & "_files", True 'better to clean away this empty folder"
+                    
+                    
+                            Case Is = "PDF"
+                                strDocName = strDocNameWithoutExtension & ".pdf"
+                                ' *** Word 2007 users - remove the apostrophe at the start of the next line ***
+                                'ActiveDocument.ExportAsFixedFormat OutputFileName:=strDocName, ExportFormat:=wdExportFormatPDF
+                                
+                            End Select
+                            
+    
+                    
+                End If '(If .Found = False Then)
+            End With '(With ActiveDocument.Content.Find : only process if the file doesn't contain the string "DONTPUBLISH":
+        End If 'If ActiveDocument.Name = "projet.doc" Then
+        
        
     
     'ChangeFileOpenDirectory oFolder
