@@ -10,6 +10,7 @@ Sub InsertTable1_1()
 ' InsertTable1_1 Macro
 '
 '
+
     ActiveDocument.Tables.Add Range:=Selection.Range, NumRows:=1, NumColumns:= _
         1, DefaultTableBehavior:=wdWord9TableBehavior, AutoFitBehavior:= _
         wdAutoFitFixed
